@@ -12,11 +12,13 @@ const SOMENTE_PDF = [
 app.post('/flow', (req, res) => {
   const { screen, data } = req.body;
 
+  let response;
+
   if (screen === 'JOIN_NOW') {
     const curso = data['Curso Solicitado'] || '';
     const somentePDF = SOMENTE_PDF.includes(curso);
 
-    return res.json({
+    response = {
       screen: 'CATEGORIES',
       data: {
         'Curso Solicitado': curso,
@@ -28,10 +30,14 @@ app.post('/flow', (req, res) => {
               { id: 'impresso', title: '📦 Impresso — Correios' }
             ]
       }
-    });
+    };
+  } else {
+    response = { screen, data: {} };
   }
 
-  return res.json({ screen, data: {} });
+  const encoded = Buffer.from(JSON.stringify(response)).toString('base64');
+  res.set('Content-Type', 'text/plain');
+  res.send(encoded);
 });
 
 const PORT = process.env.PORT || 3000;
